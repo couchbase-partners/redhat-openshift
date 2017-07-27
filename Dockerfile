@@ -5,6 +5,9 @@ FROM registry.access.redhat.com/rhel7
 MAINTAINER Couchbase Docker Team <docker@couchbase.com>
 
 
+RUN yum-config-manager --enable rhel-7-server-optional-rpms \
+    rhel-7-server-extras-rpms rhel-server-rhscl-7-rpms
+
 # Install yum dependencies
 RUN yum install -y tar \
     && yum clean all && \
@@ -31,24 +34,23 @@ RUN groupadd -g1000 couchbase && \
     useradd couchbase -g couchbase -u1000 -m -s /bin/bash && \
     echo 'couchbase:couchbase' | chpasswd
 
-ENV CB_VERSION=4.6.0 \
+ENV CB_VERSION=4.6.2 \
     CB_RELEASE_URL=http://packages.couchbase.com/releases \
-    CB_PACKAGE=couchbase-server-enterprise-4.6.0-centos7.x86_64.rpm \
+    CB_PACKAGE=couchbase-server-enterprise-4.6.2-centos7.x86_64.rpm \
     PATH=$PATH:/opt/couchbase/bin:/opt/couchbase/bin/tools:/opt/couchbase/bin/install
 
 # Install couchbase
 RUN rpm --install $CB_RELEASE_URL/$CB_VERSION/$CB_PACKAGE
 
-#clean the cache
-RUN yum clean all
-
-
 COPY scripts/couchbase-start /usr/local/bin/
+
+# Clean the cache
+RUN yum clean all
 
 LABEL Name=rhel7/couchbase-server
 LABEL Release=Latest 
 LABEL Vendor=Couchbase 
-LABEL Version=4.6.0 
+LABEL Version=4.6.2
 LABEL Architecture="x86_64"
 LABEL RUN="docker run -d --rm --privileged -p 8091:8091 --restart always --name NAME IMAGE \
             -v /opt/couchbase/var:/opt/couchbase/var \
