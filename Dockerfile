@@ -17,6 +17,7 @@ RUN yum install -y tar \
 
 # Install runit
 RUN curl -s https://packagecloud.io/install/repositories/imeyer/runit/script.rpm.sh | bash
+RUN yum -y install runit
 
 COPY functions /etc/init.d/
 
@@ -62,11 +63,8 @@ LABEL Release=Latest
 LABEL Vendor=Couchbase 
 LABEL Version=5.0.0
 LABEL Architecture="x86_64"
-LABEL RUN="docker run -d --rm --privileged -p 8091:8091 --restart always --name NAME IMAGE \
-            -v /opt/couchbase/var:/opt/couchbase/var \
-            -v /opt/couchbase/var/lib/moxi:/opt/couchbase/var/lib/moxi \
-            -v /opt/couchbase/var/lib/stats:/opt/couchbase/var/lib/stats "
-
+LABEL RUN="docker run -d --privileged -p 8091:8091 --restart always \
+    --name NAME IMAGE"
 
 COPY scripts/entrypoint.sh /
 ENTRYPOINT ["/entrypoint.sh"]
