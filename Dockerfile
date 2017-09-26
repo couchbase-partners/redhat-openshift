@@ -54,12 +54,14 @@ RUN ln -s dummy.sh /usr/local/bin/iptables-save && \
 # Clean the cache
 RUN yum clean all
 
-LABEL Name=rhel7/couchbase-server
-LABEL Release=Latest 
-LABEL Vendor=Couchbase 
-LABEL Version=5.0.0
-LABEL Architecture="x86_64"
-LABEL RUN="docker run -d --privileged -p 8091:8091 --restart always \
+LABEL name="rhel7/couchbase-server"
+LABEL vendor="Couchbase"
+LABEL version="5.0.0"
+LABEL release="Latest"
+LABEL summary="Couchbase Server 5.0.0 Enterprise"
+LABEL description="Couchbase Server 5.0.0 Enterprise"
+LABEL architecture="x86_64"
+LABEL run="docker run -d --privileged -p 8091:8091 --restart always \
     --name NAME IMAGE"
 
 COPY scripts/entrypoint.sh /
