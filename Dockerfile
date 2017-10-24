@@ -10,10 +10,16 @@ RUN yum-config-manager --enable rhel-7-server-optional-rpms \
 # Install yum dependencies
 RUN yum install -y tar \
     && yum clean all && \
-      yum -y install openssl \
+      yum -y install openssl openssh openssh-server \
       lsof lshw net-tools numactl python-httplib2 \
       sysstati wget screen psmisc zip unzip \
       gzip
+
+# Set up for SSH daemon
+RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config && \
+    sed -ri 's/#UsePAM no/UsePAM no/g' /etc/ssh/sshd_config && \
+    ssh-keygen -f /etc/ssh/ssh_host_rsa_key -N '' -t rsa && \
+    ssh-keygen -f /etc/ssh/ssh_host_dsa_key -N '' -t dsa
 
 # Install runit
 RUN curl -s https://packagecloud.io/install/repositories/imeyer/runit/script.rpm.sh | bash
