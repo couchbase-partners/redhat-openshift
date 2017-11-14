@@ -33,7 +33,7 @@ COPY help.1 /help.1
 
 ARG CB_VERSION=5.0.0
 ARG CB_RELEASE_URL=http://packages.couchbase.com/releases
-ARG CB_PACKAGE=couchbase-server-enterprise-5.0.0-centos7.x86_64.rpm
+ARG CB_PACKAGE=couchbase-server-enterprise-5.0.0-openshift.x86_64.rpm
 
 ENV PATH=$PATH:/opt/couchbase/bin:/opt/couchbase/bin/tools:/opt/couchbase/bin/install
 

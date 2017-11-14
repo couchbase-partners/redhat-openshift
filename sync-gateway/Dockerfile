@@ -18,14 +18,13 @@ COPY help.1 /help.1
 
 ARG SG_VERSION=1.5.0
 ARG SG_RELEASE_URL=http://packages.couchbase.com/releases/couchbase-sync-gateway
-ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_1.5.0_x86_64.rpm
+ARG SG_PACKAGE=couchbase-sync-gateway-enterprise-openshift_1.5.0_x86_64.rpm
 
 ENV PATH $PATH:/opt/couchbase-sync-gateway/bin
 
 # Install Sync Gateway
 RUN wget $SG_RELEASE_URL/$SG_VERSION/$SG_PACKAGE && \
-    rpm -i couchbase-sync-gateway-enterprise_1.5.0_x86_64.rpm && \
-    rm couchbase-sync-gateway-enterprise_1.5.0_x86_64.rpm
+    rpm -i $SG_PACKAGE && rm $SG_PACKAGE
 
 # Clean the cache
 RUN yum clean all
