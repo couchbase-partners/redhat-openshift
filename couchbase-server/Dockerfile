@@ -31,9 +31,9 @@ COPY functions /etc/init.d/
 COPY licenses /licenses
 COPY help.1 /help.1
 
-ARG CB_VERSION=5.0.0
+ARG CB_VERSION=5.0.1
 ARG CB_RELEASE_URL=http://packages.couchbase.com/releases
-ARG CB_PACKAGE=couchbase-server-enterprise-5.0.0-openshift.x86_64.rpm
+ARG CB_PACKAGE=couchbase-server-enterprise-${CB_VERSION}-openshift.x86_64.rpm
 
 ENV PATH=$PATH:/opt/couchbase/bin:/opt/couchbase/bin/tools:/opt/couchbase/bin/install
 
@@ -62,10 +62,10 @@ RUN yum clean all
 
 LABEL name="rhel7/couchbase-server"
 LABEL vendor="Couchbase"
-LABEL version="5.0.0"
+LABEL version="${CB_VERSION}"
 LABEL release="Latest"
-LABEL summary="Couchbase Server 5.0.0 Enterprise"
-LABEL description="Couchbase Server 5.0.0 Enterprise"
+LABEL summary="Couchbase Server ${CB_VERSION} Enterprise"
+LABEL description="Couchbase Server ${CB_VERSION} Enterprise"
 LABEL architecture="x86_64"
 LABEL run="docker run -d --privileged -p 8091:8091 --restart always \
     --name NAME IMAGE"
