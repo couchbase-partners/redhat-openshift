@@ -4,13 +4,17 @@ FROM registry.access.redhat.com/rhel7
 MAINTAINER Couchbase Docker Team <docker@couchbase.com>
 
 
-RUN yum-config-manager --enable rhel-7-server-optional-rpms \
-    rhel-7-server-extras-rpms rhel-server-rhscl-7-rpms
+RUN yum repolist --disablerepo="*" && \
+    yum-config-manager --enable rhel-7-server-rpms rhel-7-server-rt-rpms && \
+    yum-config-manager --enable rhel-7-server-optional-rpms \
+        rhel-7-server-extras-rpms rhel-server-rhscl-7-rpms && \
+    yum -y --disablerepo=rhel-7-server-rt-beta-rpms update-minimal --security \
+        --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs
 
 # Install yum dependencies
-RUN yum install -y tar \
+RUN yum -y --disablerepo=rhel-7-server-rt-beta-rpms install tar \
     && yum clean all && \
-      yum -y install openssl openssh openssh-server \
+      yum -y --disablerepo=rhel-7-server-rt-beta-rpms install openssl openssh openssh-server \
       lsof lshw net-tools numactl python-httplib2 \
       sysstati wget screen psmisc zip unzip \
       gzip
@@ -23,7 +27,7 @@ RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config && \
 
 # Install runit
 RUN curl -s https://packagecloud.io/install/repositories/imeyer/runit/script.rpm.sh | bash
-RUN yum -y install runit
+RUN yum -y --disablerepo=rhel-7-server-rt-beta-rpms install runit
 
 COPY functions /etc/init.d/
 
