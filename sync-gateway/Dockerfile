@@ -16,9 +16,9 @@ RUN yum -y update && \
 COPY licenses /licenses
 COPY help.1 /help.1
 
-ARG SG_VERSION=1.5.0
+ARG SG_VERSION=2.0.0
 ARG SG_RELEASE_URL=http://packages.couchbase.com/releases/couchbase-sync-gateway
-ARG SG_PACKAGE=couchbase-sync-gateway-enterprise-openshift_1.5.0_x86_64.rpm
+ARG SG_PACKAGE=couchbase-sync-gateway-enterprise-openshift_${SG_VERSION}_x86_64.rpm
 
 ENV PATH $PATH:/opt/couchbase-sync-gateway/bin
 
@@ -31,10 +31,10 @@ RUN yum clean all
 
 LABEL name="rhel7/sync-gateway"
 LABEL vendor="Couchbase"
-LABEL version="1.5.0"
+LABEL version="${SG_VERSION}"
 LABEL release="Latest"
-LABEL summary="Couchbase Sync Gateway 1.5.0 Enterprise"
-LABEL description="Couchbase Sync Gateway 1.5.0 Enterprise"
+LABEL summary="Couchbase Sync Gateway ${SG_VERSION} Enterprise"
+LABEL description="Couchbase Sync Gateway ${SG_VERSION} Enterprise"
 LABEL architecture="x86_64"
 LABEL run="docker run -p 4984:4984 -d rhel7/sync-gateway"
 
