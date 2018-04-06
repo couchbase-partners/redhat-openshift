@@ -18,7 +18,7 @@ COPY help.1 /help.1
 
 ARG SG_VERSION=2.0.0
 ARG SG_RELEASE_URL=http://packages.couchbase.com/releases/couchbase-sync-gateway
-ARG SG_PACKAGE=couchbase-sync-gateway-enterprise-openshift_${SG_VERSION}_x86_64.rpm
+ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_${SG_VERSION}_x86_64.rpm
 
 ENV PATH $PATH:/opt/couchbase-sync-gateway/bin
 
