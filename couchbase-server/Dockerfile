@@ -35,7 +35,7 @@ COPY functions /etc/init.d/
 COPY licenses /licenses
 COPY help.1 /help.1
 
-ARG CB_VERSION=5.1.0
+ARG CB_VERSION=5.5.0-beta
 ARG CB_RELEASE_URL=http://packages.couchbase.com/releases
 ARG CB_PACKAGE=couchbase-server-enterprise-${CB_VERSION}-centos7.x86_64.rpm
 
