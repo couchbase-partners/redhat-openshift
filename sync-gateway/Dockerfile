@@ -16,14 +16,14 @@ RUN yum -y update && \
 COPY licenses /licenses
 COPY help.1 /help.1
 
-ARG SG_VERSION=2.0.0
+ARG PROD_VERSION  # Passed in via --build-arg
 ARG SG_RELEASE_URL=http://packages.couchbase.com/releases/couchbase-sync-gateway
-ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_${SG_VERSION}_x86_64.rpm
+ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_${PROD_VERSION}_x86_64.rpm
 
 ENV PATH $PATH:/opt/couchbase-sync-gateway/bin
 
 # Install Sync Gateway
-RUN wget $SG_RELEASE_URL/$SG_VERSION/$SG_PACKAGE && \
+RUN wget $SG_RELEASE_URL/$PROD_VERSION/$SG_PACKAGE && \
     rpm -i $SG_PACKAGE && rm $SG_PACKAGE
 
 # Clean the cache
@@ -31,10 +31,10 @@ RUN yum clean all
 
 LABEL name="rhel7/sync-gateway"
 LABEL vendor="Couchbase"
-LABEL version="${SG_VERSION}"
+LABEL version="${PROD_VERSION}"
 LABEL release="Latest"
-LABEL summary="Couchbase Sync Gateway ${SG_VERSION} Enterprise"
-LABEL description="Couchbase Sync Gateway ${SG_VERSION} Enterprise"
+LABEL summary="Couchbase Sync Gateway ${PROD_VERSION} Enterprise"
+LABEL description="Couchbase Sync Gateway ${PROD_VERSION} Enterprise"
 LABEL architecture="x86_64"
 LABEL run="docker run -p 4984:4984 -d rhel7/sync-gateway"
 

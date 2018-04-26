@@ -35,9 +35,9 @@ COPY functions /etc/init.d/
 COPY licenses /licenses
 COPY help.1 /help.1
 
-ARG CB_VERSION=5.5.0-beta
+ARG PROD_VERSION  # Passed in via --build-arg
 ARG CB_RELEASE_URL=http://packages.couchbase.com/releases
-ARG CB_PACKAGE=couchbase-server-enterprise-${CB_VERSION}-centos7.x86_64.rpm
+ARG CB_PACKAGE=couchbase-server-enterprise-${PROD_VERSION}-centos7.x86_64.rpm
 
 ENV PATH=$PATH:/opt/couchbase/bin:/opt/couchbase/bin/tools:/opt/couchbase/bin/install
 
@@ -48,7 +48,7 @@ RUN groupadd -g1000 couchbase && \
     echo 'couchbase:couchbase' | chpasswd
 
 # Install couchbase
-RUN rpm --install $CB_RELEASE_URL/$CB_VERSION/$CB_PACKAGE
+RUN rpm --install $CB_RELEASE_URL/$PROD_VERSION/$CB_PACKAGE
 
 # Add runit script for couchbase-server
 COPY scripts/run /etc/service/couchbase-server/run
@@ -66,10 +66,10 @@ RUN yum clean all
 
 LABEL name="rhel7/couchbase-server"
 LABEL vendor="Couchbase"
-LABEL version="${CB_VERSION}"
+LABEL version="${PROD_VERSION}"
 LABEL release="Latest"
-LABEL summary="Couchbase Server ${CB_VERSION} Enterprise"
-LABEL description="Couchbase Server ${CB_VERSION} Enterprise"
+LABEL summary="Couchbase Server ${PROD_VERSION} Enterprise"
+LABEL description="Couchbase Server ${PROD_VERSION} Enterprise"
 LABEL architecture="x86_64"
 LABEL run="docker run -d --privileged -p 8091:8091 --restart always \
     --name NAME IMAGE"
