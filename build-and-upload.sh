@@ -60,7 +60,7 @@ fi
 cd ${PRODUCT}
 
 # Some informational settings
-CONF_DIR=/root/openshift/${PRODUCT}
+CONF_DIR=/home/couchbase/openshift/${PRODUCT}
 IMAGE=${PRODUCT}-${VERSION}-openshift${NAME_EXT}
 PROJECT_ID=$(cat ${CONF_DIR}/project_id)
 UPLOAD_HOST=scan.connect.redhat.com
