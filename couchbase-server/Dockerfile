@@ -35,7 +35,7 @@ COPY functions /etc/init.d/
 COPY licenses /licenses
 COPY help.1 /help.1
 
-ARG PROD_VERSION  # Passed in via --build-arg
+ARG PROD_VERSION
 ARG CB_RELEASE_URL=http://packages.couchbase.com/releases
 ARG CB_PACKAGE=couchbase-server-enterprise-${PROD_VERSION}-centos7.x86_64.rpm
 

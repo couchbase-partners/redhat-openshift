@@ -16,7 +16,7 @@ RUN yum -y update && \
 COPY licenses /licenses
 COPY help.1 /help.1
 
-ARG PROD_VERSION  # Passed in via --build-arg
+ARG PROD_VERSION
 ARG SG_RELEASE_URL=http://packages.couchbase.com/releases/couchbase-sync-gateway
 ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_${PROD_VERSION}_x86_64.rpm
 
