@@ -44,6 +44,9 @@ if [[ -z "$BUILD" ]]; then
     BUILD=1
 fi
 
+# Enter product directory
+cd ${PRODUCT}
+
 # Check for testing build and set up variables accordingly
 DOCKER_FILE=Dockerfile
 NAME_EXT=""
@@ -55,9 +58,6 @@ if [[ "$TESTING" == "true" ]]; then
        DOCKER_FILE=Dockerfile.testing
    fi
 fi
-
-# Enter product directory
-cd ${PRODUCT}
 
 # Some informational settings
 CONF_DIR=/home/couchbase/openshift/${PRODUCT}
