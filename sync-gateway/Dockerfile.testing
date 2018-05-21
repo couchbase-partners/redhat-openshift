@@ -5,7 +5,9 @@ MAINTAINER Couchbase Docker Team <docker@couchbase.com>
 
 
 RUN yum-config-manager --enable rhel-7-server-optional-rpms \
-    rhel-7-server-extras-rpms rhel-server-rhscl-7-rpms
+        rhel-7-server-extras-rpms rhel-server-rhscl-7-rpms && \
+    yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical \
+        --setopt=tsflags=nodocs
 
 # Install yum dependencies
 RUN yum -y update && \
