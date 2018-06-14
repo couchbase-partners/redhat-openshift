@@ -67,7 +67,7 @@ UPLOAD_HOST=scan.connect.redhat.com
 UPLOAD_URI=${UPLOAD_HOST}/${PROJECT_ID}/${IMAGE}:${VERSION}-${BUILD}
 
 # Build image, acquiring image ID (needed for upload)
-IMAGE_ID=$(docker build -q --build-arg PROD_VERSION=${VERSION} -f ${DOCKER_FILE} -t ${IMAGE} . 2>/dev/null | awk '/Successfully built/{print $NF}')
+IMAGE_ID=$(docker build --build-arg PROD_VERSION=${VERSION} -f ${DOCKER_FILE} -t ${IMAGE} . 2>/dev/null | awk '/Successfully built/{print $NF}')
 
 # If testing, create tarball of image, else tag and upload image to OpenShift
 if [[ "$TESTING" == "true" ]]; then
