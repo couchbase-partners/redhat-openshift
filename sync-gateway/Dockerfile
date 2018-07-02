@@ -19,6 +19,7 @@ COPY licenses /licenses
 COPY help.1 /help.1
 
 ARG PROD_VERSION
+ARG OS_BUILD
 ARG SG_RELEASE_URL=http://packages.couchbase.com/releases/couchbase-sync-gateway
 ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_${PROD_VERSION}_x86_64.rpm
 
@@ -34,6 +35,7 @@ RUN yum clean all
 LABEL name="rhel7/sync-gateway"
 LABEL vendor="Couchbase"
 LABEL version="${PROD_VERSION}"
+LABEL openshift_build="${OS_BUILD}"
 LABEL release="Latest"
 LABEL summary="Couchbase Sync Gateway ${PROD_VERSION} Enterprise"
 LABEL description="Couchbase Sync Gateway ${PROD_VERSION} Enterprise"

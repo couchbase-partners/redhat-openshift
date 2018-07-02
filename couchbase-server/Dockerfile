@@ -36,6 +36,7 @@ COPY licenses /licenses
 COPY help.1 /help.1
 
 ARG PROD_VERSION
+ARG OS_BUILD
 ARG CB_RELEASE_URL=http://packages.couchbase.com/releases
 ARG CB_PACKAGE=couchbase-server-enterprise-${PROD_VERSION}-centos7.x86_64.rpm
 
@@ -67,6 +68,7 @@ RUN yum clean all
 LABEL name="rhel7/couchbase-server"
 LABEL vendor="Couchbase"
 LABEL version="${PROD_VERSION}"
+LABEL openshift_build="${OS_BUILD}"
 LABEL release="Latest"
 LABEL summary="Couchbase Server ${PROD_VERSION} Enterprise"
 LABEL description="Couchbase Server ${PROD_VERSION} Enterprise"
