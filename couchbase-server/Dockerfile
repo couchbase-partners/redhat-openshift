@@ -50,9 +50,12 @@ RUN groupadd -g1000 couchbase && \
 
 # Install couchbase
 RUN rpm --install $CB_RELEASE_URL/$PROD_VERSION/$CB_PACKAGE
+RUN chmod -R o+rwx /opt/couchbase/etc
+RUN chmod -R o+rwx /opt/couchbase/var
 
 # Add runit script for couchbase-server
 COPY scripts/run /etc/service/couchbase-server/run
+RUN chmod g+rwx /etc/service/couchbase-server
 
 # Add dummy script for commands invoked by cbcollect_info that
 # make no sense in a Docker container
@@ -77,6 +80,8 @@ LABEL run="docker run -d --privileged -p 8091:8091 --restart always \
     --name NAME IMAGE"
 
 COPY scripts/entrypoint.sh /
+
+USER 1000
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["couchbase-server"]
 
