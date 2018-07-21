@@ -55,7 +55,10 @@ RUN chmod -R o+rwx /opt/couchbase/var
 
 # Add runit script for couchbase-server
 COPY scripts/run /etc/service/couchbase-server/run
-RUN chmod g+rwx /etc/service/couchbase-server
+RUN chmod go+rwx /etc/service/couchbase-server
+
+# Temporary fix for entrypoint
+RUN chmod o+rx /sbin/*
 
 # Add dummy script for commands invoked by cbcollect_info that
 # make no sense in a Docker container
