@@ -1,3 +1,5 @@
+# Dockerfile to build the OpenShift image for couchbase-server
+
 # This is a RHEL 7 image from Redhat
 FROM registry.access.redhat.com/rhel7
 
@@ -71,16 +73,16 @@ RUN ln -s dummy.sh /usr/local/bin/iptables-save && \
 # Clean the cache
 RUN yum clean all
 
-LABEL name="rhel7/couchbase-server"
-LABEL vendor="Couchbase"
-LABEL version="${PROD_VERSION}"
-LABEL openshift_build="${OS_BUILD}"
-LABEL release="Latest"
-LABEL summary="Couchbase Server ${PROD_VERSION} Enterprise"
-LABEL description="Couchbase Server ${PROD_VERSION} Enterprise"
-LABEL architecture="x86_64"
-LABEL run="docker run -d --privileged -p 8091:8091 --restart always \
-    --name NAME IMAGE"
+LABEL name="rhel7/couchbase-server" \
+      vendor="Couchbase" \
+      version="${PROD_VERSION}" \
+      openshift_build="${OS_BUILD}" \
+      release="Latest" \
+      summary="Couchbase Server ${PROD_VERSION} Enterprise" \
+      description="Couchbase Server ${PROD_VERSION} Enterprise" \
+      architecture="x86_64" \
+      run="docker run -d --privileged -p 8091:8091 --restart always \
+           --name NAME IMAGE"
 
 COPY scripts/entrypoint.sh /
 
