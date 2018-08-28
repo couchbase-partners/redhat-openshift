@@ -3,10 +3,8 @@ FROM registry.access.redhat.com/rhel7
 
 MAINTAINER Couchbase Docker Team <docker@couchbase.com>
 
-# Install latest security updates
-RUN yum repolist --disablerepo="*" && \
-    yum-config-manager --enable rhel-7-server-rpms rhel-7-server-rt-rpms && \
-    yum-config-manager --enable rhel-7-server-optional-rpms \
+
+RUN yum-config-manager --enable rhel-7-server-optional-rpms \
         rhel-7-server-extras-rpms rhel-server-rhscl-7-rpms && \
     yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical \
         --setopt=tsflags=nodocs
@@ -22,7 +20,7 @@ COPY help.1 /help.1
 
 ARG PROD_VERSION
 ARG OS_BUILD
-ARG SG_RELEASE_URL=http://packages.couchbase.com/releases/couchbase-sync-gateway
+ARG SG_RELEASE_URL=http://packages-staging.couchbase.com/releases/couchbase-sync-gateway
 ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_${PROD_VERSION}_x86_64.rpm
 
 ENV PATH $PATH:/opt/couchbase-sync-gateway/bin
@@ -34,15 +32,15 @@ RUN wget $SG_RELEASE_URL/$PROD_VERSION/$SG_PACKAGE && \
 # Clean the cache
 RUN yum clean all
 
-LABEL name="rhel7/sync-gateway" \
-      vendor="Couchbase" \
-      version="${PROD_VERSION}" \
-      openshift_build="${OS_BUILD}" \
-      release="Latest" \
-      summary="Couchbase Sync Gateway ${PROD_VERSION} Enterprise" \
-      description="Couchbase Sync Gateway ${PROD_VERSION} Enterprise" \
-      architecture="x86_64" \
-      run="docker run -p 4984:4984 -d rhel7/sync-gateway"
+LABEL name="rhel7/sync-gateway"
+LABEL vendor="Couchbase"
+LABEL version="${PROD_VERSION}"
+LABEL openshift_build="${OS_BUILD}"
+LABEL release="Latest"
+LABEL summary="Couchbase Sync Gateway ${PROD_VERSION} Enterprise"
+LABEL description="Couchbase Sync Gateway ${PROD_VERSION} Enterprise"
+LABEL architecture="x86_64"
+LABEL run="docker run -p 4984:4984 -d rhel7/sync-gateway"
 
 # Create directory where the default config stores memory snapshots to disk
 RUN mkdir /opt/couchbase-sync-gateway/data
