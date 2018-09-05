@@ -13,7 +13,7 @@ function show_help {
 }
 
 # Parse options and ensure required ones are there
-while getopts :p:v:b:th opt; do
+while getopts :p:v:b:sth opt; do
     case ${opt} in
         p) PRODUCT="$OPTARG"
            ;;
