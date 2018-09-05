@@ -22,7 +22,8 @@ COPY help.1 /help.1
 
 ARG PROD_VERSION
 ARG OS_BUILD
-ARG SG_RELEASE_URL=http://packages.couchbase.com/releases/couchbase-sync-gateway
+ARG STAGING
+ARG SG_RELEASE_URL=http://packages${STAGING}.couchbase.com/releases/couchbase-sync-gateway
 ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_${PROD_VERSION}_x86_64.rpm
 
 ENV PATH $PATH:/opt/couchbase-sync-gateway/bin

@@ -39,7 +39,8 @@ COPY help.1 /help.1
 
 ARG PROD_VERSION
 ARG OS_BUILD
-ARG CB_RELEASE_URL=http://packages.couchbase.com/releases
+ARG STAGING
+ARG CB_RELEASE_URL=http://packages${STAGING}.couchbase.com/releases
 ARG CB_PACKAGE=couchbase-server-enterprise-${PROD_VERSION}-centos7.x86_64.rpm
 
 ENV PATH=$PATH:/opt/couchbase/bin:/opt/couchbase/bin/tools:/opt/couchbase/bin/install
