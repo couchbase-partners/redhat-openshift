@@ -58,5 +58,5 @@ ENTRYPOINT ["sync_gateway"]
 CMD ["/etc/sync_gateway/config.json"]
 
 # Expose ports
-#  port 4984: public port
-EXPOSE 4984
+#  port 4984: public port, port 4985: admin port
+EXPOSE 4984 4985
