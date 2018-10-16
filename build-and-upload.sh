@@ -67,17 +67,24 @@ fi
 CONF_DIR=/home/couchbase/openshift/${PRODUCT}
 IMAGE=${PRODUCT}-${VERSION}-openshift${NAME_EXT}
 PROJECT_ID=$(cat ${CONF_DIR}/project_id)
-UPLOAD_HOST=scan.connect.redhat.com
-UPLOAD_URI=${UPLOAD_HOST}/${PROJECT_ID}/${IMAGE}:${VERSION}-${BUILD}
+
+# Staging/testing builds are sent to internal registry
+if [[ "$STAGING" == "true" || "$TESTING" == "true" ]]; then
+    UPLOAD_HOST=build-docker.couchbase.com
+    UPLOAD_URI=${UPLOAD_HOST}/couchbase/${IMAGE}:${VERSION}-${BUILD}
+else
+    UPLOAD_HOST=scan.connect.redhat.com
+    UPLOAD_URI=${UPLOAD_HOST}/${PROJECT_ID}/${IMAGE}:${VERSION}-${BUILD}
+fi
+
 
 # Build image, acquiring image ID (needed for upload)
 IMAGE_ID=$(docker build --build-arg PROD_VERSION=${VERSION} --build-arg OS_BUILD=${BUILD} --build-arg STAGING=${S3_STAGING} -f ${DOCKER_FILE} -t ${IMAGE} . 2>/dev/null | awk '/Successfully built/{print $NF}')
 
-# If testing, create tarball of image, else tag and upload image to OpenShift
-if [[ "$STAGING" == "true" || "$TESTING" == "true" ]]; then
-    docker save -o ${IMAGE}.tar ${IMAGE}
-else
+# Need to login for production (RedHat) registry
+if [[ ! ("$STAGING" == "true" || "$TESTING" == "true") ]]; then
     docker login -u unused -p "$(cat ${CONF_DIR}/registry_key)" -e none ${UPLOAD_HOST}
-    docker tag ${IMAGE_ID} ${UPLOAD_URI}
-    docker push ${UPLOAD_URI}
 fi
+
+docker tag ${IMAGE_ID} ${UPLOAD_URI}
+docker push ${UPLOAD_URI}
