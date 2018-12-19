@@ -58,6 +58,10 @@ S3_STAGING=""
 if [[ "$STAGING" == "true" || "$TESTING" == "true" ]]; then
    NAME_EXT="-testing"
 
+   if [[ -e "Dockerfile.testing" ]]; then
+       DOCKER_FILE=Dockerfile.testing
+   fi
+
    if [[ "$STAGING" == "true" ]]; then
        S3_STAGING="-staging"
    fi
