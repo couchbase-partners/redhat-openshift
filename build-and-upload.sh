@@ -8,7 +8,6 @@ function show_help {
     echo "  -v : Version of product to use (e.g. 5.1.0) (Required)"
     echo "  -b : Build number of image (Optional, defaults to 1)"
     echo "  -s : Build staging test image and tarball (Boolean)"
-    echo "  -t : Build testing image and tarball (Boolean)"
     exit 0
 }
 
@@ -22,8 +21,6 @@ while getopts :p:v:b:sth opt; do
         b) BUILD="$OPTARG"
            ;;
         s) STAGING="true"
-           ;;
-        t) TESTING="true"
            ;;
         h) show_help
            ;;
@@ -50,20 +47,17 @@ fi
 # Enter product directory
 cd ${PRODUCT}
 
-# Check for testing build and set up variables accordingly
+# Check for staging build and set up variables accordingly
 DOCKER_FILE=Dockerfile
 NAME_EXT=""
 S3_STAGING=""
 
-if [[ "$STAGING" == "true" || "$TESTING" == "true" ]]; then
+if [[ "$STAGING" == "true" ]]; then
    NAME_EXT="-testing"
+   S3_STAGING="-staging"
 
    if [[ -e "Dockerfile.testing" ]]; then
        DOCKER_FILE=Dockerfile.testing
-   fi
-
-   if [[ "$STAGING" == "true" ]]; then
-       S3_STAGING="-staging"
    fi
 fi
 
@@ -72,8 +66,8 @@ CONF_DIR=/home/couchbase/openshift/${PRODUCT}
 IMAGE=${PRODUCT}-${VERSION}-openshift${NAME_EXT}
 PROJECT_ID=$(cat ${CONF_DIR}/project_id)
 
-# Staging/testing builds are sent to internal registry
-if [[ "$STAGING" == "true" || "$TESTING" == "true" ]]; then
+# Staging builds are sent to internal registry
+if [[ "$STAGING" == "true" ]]; then
     UPLOAD_HOST=build-docker.couchbase.com
     UPLOAD_URI=${UPLOAD_HOST}/couchbase/${IMAGE}:${VERSION}-${BUILD}
 else
@@ -86,7 +80,7 @@ fi
 IMAGE_ID=$(docker build --no-cache --build-arg PROD_VERSION=${VERSION} --build-arg OS_BUILD=${BUILD} --build-arg STAGING=${S3_STAGING} -f ${DOCKER_FILE} -t ${IMAGE} . 2>/dev/null | awk '/Successfully built/{print $NF}')
 
 # Need to login for production (RedHat) registry
-if [[ ! ("$STAGING" == "true" || "$TESTING" == "true") ]]; then
+if [[ ! ("$STAGING" == "true") ]]; then
     docker login -u unused -p "$(cat ${CONF_DIR}/registry_key)" -e none ${UPLOAD_HOST}
 fi
 
