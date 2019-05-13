@@ -5,7 +5,6 @@ FROM registry.access.redhat.com/rhel7
 
 MAINTAINER Couchbase Docker Team <docker@couchbase.com>
 
-
 RUN yum repolist --disablerepo="*" && \
     yum-config-manager --enable rhel-7-server-rpms rhel-7-server-rt-rpms && \
     yum-config-manager --enable rhel-7-server-optional-rpms \
@@ -34,7 +33,7 @@ COPY help.1 /help.1
 ARG PROD_VERSION
 ARG OS_BUILD
 ARG STAGING
-ARG CB_RELEASE_URL=http://packages${STAGING}.couchbase.com/releases
+ARG CB_RELEASE_URL=http://packages${STAGING}.couchbase.com/releases/${PROD_VERSION}
 ARG CB_PACKAGE=couchbase-server-enterprise-${PROD_VERSION}-centos7.x86_64.rpm
 
 ENV PATH=$PATH:/opt/couchbase/bin:/opt/couchbase/bin/tools:/opt/couchbase/bin/install
@@ -46,7 +45,7 @@ RUN groupadd -g1000 couchbase && \
     echo 'couchbase:couchbase' | chpasswd
 
 # Install couchbase
-RUN rpm --install $CB_RELEASE_URL/$PROD_VERSION/$CB_PACKAGE
+RUN rpm --install $CB_RELEASE_URL/$CB_PACKAGE
 RUN chmod -R o+rwx /opt/couchbase/etc
 RUN chmod -R o+rwx /opt/couchbase/var
 
@@ -68,10 +67,9 @@ RUN ln -s dummy.sh /usr/local/bin/iptables-save && \
 # Clean the cache
 RUN yum clean all
 
-LABEL name="rhel7/couchbase-server" \
+LABEL name="couchbase/server" \
       vendor="Couchbase" \
       version="${PROD_VERSION}" \
-      openshift_build="${OS_BUILD}" \
       release="Latest" \
       summary="Couchbase Server ${PROD_VERSION} Enterprise" \
       description="Couchbase Server ${PROD_VERSION} Enterprise" \

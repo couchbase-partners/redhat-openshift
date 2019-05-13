@@ -23,27 +23,26 @@ COPY help.1 /help.1
 ARG PROD_VERSION
 ARG OS_BUILD
 ARG STAGING
-ARG SG_RELEASE_URL=http://packages${STAGING}.couchbase.com/releases/couchbase-sync-gateway
+ARG SG_RELEASE_URL=http://packages${STAGING}.couchbase.com/releases/couchbase-sync-gateway/${PROD_VERSION}
 ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_${PROD_VERSION}_x86_64.rpm
 
 ENV PATH $PATH:/opt/couchbase-sync-gateway/bin
 
 # Install Sync Gateway
-RUN wget $SG_RELEASE_URL/$PROD_VERSION/$SG_PACKAGE && \
+RUN wget $SG_RELEASE_URL/$SG_PACKAGE && \
     rpm -i $SG_PACKAGE && rm $SG_PACKAGE
 
 # Clean the cache
 RUN yum clean all
 
-LABEL name="rhel7/sync-gateway" \
+LABEL name="couchbase/sync-gateway" \
       vendor="Couchbase" \
       version="${PROD_VERSION}" \
-      openshift_build="${OS_BUILD}" \
       release="Latest" \
       summary="Couchbase Sync Gateway ${PROD_VERSION} Enterprise" \
       description="Couchbase Sync Gateway ${PROD_VERSION} Enterprise" \
       architecture="x86_64" \
-      run="docker run -p 4984:4984 -d rhel7/sync-gateway"
+      run="docker run -p 4984:4984 -d IMAGE"
 
 # Create directory where the default config stores memory snapshots to disk
 RUN mkdir /opt/couchbase-sync-gateway/data
