@@ -6,7 +6,7 @@ function show_help {
     echo "Options:"
     echo "  -p : Product to publish (e.g. couchbase-server) (Required; determines credentials to use)"
     echo "  -v : Full version to publish including internal build number (eg. 6.5.0-1334) (Required)"
-    echo "  -b : RHCC build number of image (Optional, defaults to 1)"
+    echo "  -b : RHCC build number of image (Optional, defaults to absent)"
     exit 0
 }
 
@@ -37,22 +37,22 @@ if [[ -z "$VERSION" ]]; then
     exit 1
 fi
 
-if [[ -z "$BUILD" ]]; then
-    BUILD=1
-fi
-
 # Some informational settings
 CONF_DIR=/home/couchbase/openshift/${PRODUCT}
 PROJECT_ID=$(cat ${CONF_DIR}/project_id)
 IMAGE_NAME=$(cat ${CONF_DIR}/image_name)
 
 # Need to login for production (Red Hat) registry
-docker login -u unused -p "$(cat ${CONF_DIR}/registry_key)" ${UPLOAD_HOST}
+docker login -u unused -p "$(cat ${CONF_DIR}/registry_key)" scan.connect.redhat.com
 
 # Compute full image names
 INPUT_IMAGE=build-docker.couchbase.com/${IMAGE_NAME}:${VERSION}
 BASE_VERSION=${VERSION/-*/}
-OUTPUT_IMAGE=scan.connect.redhat.com/${PROJECT_ID}/unused:${BASE_VERSION}-${BUILD}
+if [[ -z "$BUILD" ]]; then
+    OUTPUT_IMAGE=scan.connect.redhat.com/${PROJECT_ID}/unused:${BASE_VERSION}
+else
+    OUTPUT_IMAGE=scan.connect.redhat.com/${PROJECT_ID}/unused:${BASE_VERSION}-${BUILD}
+fi
 
 # Ensure image is available locally to be pushed
 docker pull ${INPUT_IMAGE}
