@@ -30,8 +30,7 @@ COPY functions /etc/init.d/
 COPY licenses /licenses
 COPY help.1 /help.1
 
-ARG PROD_VERSION
-ARG OS_BUILD
+ARG PROD_VERSION=6.0.1
 ARG STAGING
 ARG CB_RELEASE_URL=http://packages${STAGING}.couchbase.com/releases/${PROD_VERSION}
 ARG CB_PACKAGE=couchbase-server-enterprise-${PROD_VERSION}-centos7.x86_64.rpm

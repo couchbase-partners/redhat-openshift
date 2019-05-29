@@ -77,7 +77,7 @@ fi
 
 
 # Build image, acquiring image ID (needed for upload)
-IMAGE_ID=$(docker build --no-cache --build-arg PROD_VERSION=${VERSION} --build-arg OS_BUILD=${BUILD} --build-arg STAGING=${S3_STAGING} -f ${DOCKER_FILE} -t ${IMAGE} . 2>/dev/null | awk '/Successfully built/{print $NF}')
+IMAGE_ID=$(docker build --no-cache --build-arg PROD_VERSION=${VERSION} --build-arg STAGING=${S3_STAGING} -f ${DOCKER_FILE} -t ${IMAGE} . 2>/dev/null | awk '/Successfully built/{print $NF}')
 
 # Need to login for production (RedHat) registry
 if [[ ! ("$STAGING" == "true") ]]; then
