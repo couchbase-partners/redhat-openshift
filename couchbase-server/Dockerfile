@@ -16,7 +16,7 @@ RUN yum repolist --disablerepo="*" && \
 RUN yum -y install tar \
     && yum clean all && \
       yum -y install openssl \
-      lsof lshw net-tools numactl python-httplib2 \
+      lsof lshw net-tools numactl \
       sysstati wget screen psmisc zip unzip \
       gzip
 
@@ -44,7 +44,7 @@ RUN groupadd -g1000 couchbase && \
     echo 'couchbase:couchbase' | chpasswd
 
 # Install couchbase
-RUN rpm --install $CB_RELEASE_URL/$CB_PACKAGE
+RUN yum install -y $CB_RELEASE_URL/$CB_PACKAGE
 RUN chmod -R o+rwx /opt/couchbase/etc
 RUN chmod -R o+rwx /opt/couchbase/var
 
