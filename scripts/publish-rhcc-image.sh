@@ -47,7 +47,7 @@ docker login -u unused -p "$(cat ${CONF_DIR}/registry_key)" scan.connect.redhat.
 
 # Compute full image names
 INPUT_IMAGE=build-docker.couchbase.com/${IMAGE_NAME}:${VERSION}
-BASE_VERSION=${VERSION/-*/}
+BASE_VERSION=${VERSION%-*}
 if [[ -z "$BUILD" ]]; then
     OUTPUT_IMAGE=scan.connect.redhat.com/${PROJECT_ID}/unused:${BASE_VERSION}
 else
