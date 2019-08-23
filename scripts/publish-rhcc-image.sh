@@ -42,6 +42,18 @@ CONF_DIR=/home/couchbase/openshift/${PRODUCT}
 PROJECT_ID=$(cat ${CONF_DIR}/project_id)
 IMAGE_NAME=$(cat ${CONF_DIR}/image_name)
 
+# Workaround for incorrect naming of Operator and Admission Controller on
+# internal registry. (Can't just change the contents of the image_name
+# files because other scripts use them and need the "right" names.)
+case ${PRODUCT} in
+  couchbase-operator)
+    IMAGE_NAME=couchbase/couchbase-operator-rhel
+    ;;
+  couchbase-admission)
+    IMAGE_NAME=couchbase/couchbase-admission-rhel
+    ;;
+esac
+
 # Need to login for production (Red Hat) registry
 docker login -u unused -p "$(cat ${CONF_DIR}/registry_key)" scan.connect.redhat.com
 
