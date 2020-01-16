@@ -41,24 +41,12 @@ fi
 CONF_DIR=/home/couchbase/openshift/${PRODUCT}
 PROJECT_ID=$(cat ${CONF_DIR}/project_id)
 IMAGE_NAME=$(cat ${CONF_DIR}/image_name)
-
-# Workaround for incorrect naming of Operator and Admission Controller on
-# internal registry. (Can't just change the contents of the image_name
-# files because other scripts use them and need the "right" names.)
-case ${PRODUCT} in
-  couchbase-operator)
-    IMAGE_NAME=couchbase/couchbase-operator-rhel
-    ;;
-  couchbase-admission)
-    IMAGE_NAME=couchbase/couchbase-admission-rhel
-    ;;
-esac
+INTERNAL_IMAGE_NAME=$(cat ${CONF_DIR}/internal_image_name):${VERSION}
 
 # Need to login for production (Red Hat) registry
 docker login -u unused -p "$(cat ${CONF_DIR}/registry_key)" scan.connect.redhat.com
 
 # Compute full image names
-INPUT_IMAGE=build-docker.couchbase.com/${IMAGE_NAME}:${VERSION}
 BASE_VERSION=${VERSION%-*}
 if [[ -z "$BUILD" ]]; then
     OUTPUT_IMAGE=scan.connect.redhat.com/${PROJECT_ID}/unused:${BASE_VERSION}
@@ -67,14 +55,14 @@ else
 fi
 
 # Ensure image is available locally to be pushed
-docker pull ${INPUT_IMAGE}
+docker pull ${INTERNAL_IMAGE_NAME}
 
-docker tag ${INPUT_IMAGE} ${OUTPUT_IMAGE}
+docker tag ${INTERNAL_IMAGE_NAME} ${OUTPUT_IMAGE}
 echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-echo Pushing ${INPUT_IMAGE}
+echo Pushing ${INTERNAL_IMAGE_NAME}
 echo as ${OUTPUT_IMAGE}
 echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 docker push ${OUTPUT_IMAGE}
-docker rmi ${INPUT_IMAGE}
+docker rmi ${INTERNAL_IMAGE_NAME}
 docker rmi ${OUTPUT_IMAGE}

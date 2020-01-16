@@ -63,9 +63,9 @@ docker pull ${BASE_IMAGE}
 
 # Some informational settings
 CONF_DIR=/home/couchbase/openshift/${PRODUCT}
-IMAGE_NAME=$(cat ${CONF_DIR}/image_name)
+INTERNAL_IMAGE_NAME=$(cat ${CONF_DIR}/internal_image_name)
 
-IMAGE=build-docker.couchbase.com/${IMAGE_NAME}:${VERSION}-${BUILD}
+IMAGE=${INTERNAL_IMAGE_NAME}:${VERSION}-${BUILD}
 
 # Build image
 docker build --no-cache \
