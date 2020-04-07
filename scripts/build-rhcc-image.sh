@@ -11,6 +11,8 @@ function show_help {
     exit 0
 }
 
+SCRIPT_DIR=$(dirname $(readlink -e -- "${BASH_SOURCE}"))
+
 STAGING=""
 
 # Parse options and ensure required ones are there
@@ -68,6 +70,7 @@ INTERNAL_IMAGE_NAME=$(cat ${CONF_DIR}/internal_image_name)
 IMAGE=${INTERNAL_IMAGE_NAME}:${VERSION}-${BUILD}
 
 # Build image
+${SCRIPT_DIR}/update-base.sh ${DOCKER_FILE}
 docker build --no-cache \
   --build-arg PROD_VERSION=${VERSION} \
   --build-arg STAGING=${STAGING} \

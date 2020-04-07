@@ -58,7 +58,7 @@ tags = json.load(sys.stdin)["tags"]
 highest = 0
 for tag in tags:
     if tag.startswith("$VERSION"):
-        bldno = tag.split('-')[1]
+        bldno = tag.split('-')[-1]
         if bldno > highest:
             highest = bldno
 print int(highest) + 1
