@@ -1,4 +1,6 @@
-#!/bin/bash -ex
+#!/bin/bash -e
+
+script_dir=$(dirname $(readlink -e -- "${BASH_SOURCE}"))
 
 # Basic help information
 function show_help {
@@ -34,21 +36,6 @@ if [[ -z "$VERSION" ]]; then
     exit 1
 fi
 
-# Some informational settings
-CONF_DIR=/home/couchbase/openshift/${PRODUCT}
-IMAGE_NAME=$(cat ${CONF_DIR}/image_name)
-
-# Do OAuth dance with RHCC
-tokenUri="https://registry.connect.redhat.com/auth/realms/rhc4tp/protocol/redhat-docker-v2/auth"
-# This is a "Registry Service Account" on access.redhat.com associated with the rhel8-couchbase user
-username='7638313|rhel8-couchbase'
-set +x
-password=$(cat /home/couchbase/openshift/rhcc/registry-service-token.txt)
-# Obtain short-duration access token from auth server
-data=("service=docker-registry" "client_id=curl" "scope=repository:rhel:pull")
-token=$(curl --silent -L --user "$username:$password" --get --data-urlencode ${data[0]} --data-urlencode ${data[1]} --data-urlencode ${data[2]} $tokenUri |
-        python -c 'import sys, json; print json.load(sys.stdin)["token"]')
-
 # Ask RHCC for tag numbers and pick out the last one
 PYSCRIPT=$(cat <<EOF
 import sys
@@ -58,14 +45,16 @@ tags = json.load(sys.stdin)["tags"]
 highest = 0
 for tag in tags:
     if tag.startswith("$VERSION"):
-        bldno = tag.split('-')[-1]
+        try:
+            bldno = int(tag.split('-')[-1])
+        except ValueError:
+            continue
         if bldno > highest:
             highest = bldno
-print int(highest) + 1
+print (highest + 1)
 EOF
 )
 
-listUri="https://registry.connect.redhat.com/v2/$IMAGE_NAME/tags/list"
-nextbld="$(curl --silent -H "Authorization: Bearer $token" --get -H "Accept: application/json" $listUri | python -c "$PYSCRIPT")"
+nextbld=$("${script_dir}/get-tag-list.sh" ${PRODUCT} | python -c "$PYSCRIPT")
 echo "Next build number for $VERSION is $nextbld"
 echo "NEXT_BLD=$nextbld" >> nextbuild.properties
