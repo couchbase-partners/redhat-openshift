@@ -3,26 +3,34 @@
 # This is a RHEL 7 image from Redhat
 FROM registry.access.redhat.com/rhel7
 
-MAINTAINER Couchbase Docker Team <docker@couchbase.com>
+LABEL maintainer="build-team@couchbase.com"
 
 RUN yum repolist --disablerepo="*" && \
     yum-config-manager --enable rhel-7-server-rpms rhel-7-server-rt-rpms && \
     yum-config-manager --enable rhel-7-server-optional-rpms \
         rhel-7-server-extras-rpms rhel-server-rhscl-7-rpms && \
     yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical \
-        --setopt=tsflags=nodocs
+        --setopt=tsflags=nodocs && \
+    yum clean all
 
 # Install yum dependencies
 RUN yum -y install tar \
-    && yum clean all && \
-      yum -y install openssl \
-      lsof lshw net-tools numactl \
-      sysstati wget screen psmisc zip unzip \
-      gzip
+      lsof lshw net-tools \
+      psmisc zip unzip \
+      gzip \
+    && yum clean all
+
+# Install sshd only if TESTING
+ARG TESTING
+RUN if [ "x$TESTING" = "xtrue" ]; then \
+        yum install -y openssh openssh-server; \
+        yum clean all; \
+    fi
 
 # Install runit
-RUN curl -s https://packagecloud.io/install/repositories/imeyer/runit/script.rpm.sh | bash
-RUN yum -y install runit
+RUN curl -s https://packagecloud.io/install/repositories/imeyer/runit/script.rpm.sh | bash \
+    && yum -y install runit \
+    && yum clean all
 
 COPY functions /etc/init.d/
 
@@ -30,7 +38,7 @@ COPY functions /etc/init.d/
 COPY licenses /licenses
 COPY help.1 /help.1
 
-ARG PROD_VERSION=6.0.1
+ARG PROD_VERSION
 ARG STAGING
 ARG CB_RELEASE_URL=http://packages${STAGING}.couchbase.com/releases/${PROD_VERSION}
 ARG CB_PACKAGE=couchbase-server-enterprise-${PROD_VERSION}-centos7.x86_64.rpm
@@ -44,7 +52,8 @@ RUN groupadd -g1000 couchbase && \
     echo 'couchbase:couchbase' | chpasswd
 
 # Install couchbase
-RUN yum install -y $CB_RELEASE_URL/$CB_PACKAGE
+RUN yum install -y $CB_RELEASE_URL/$CB_PACKAGE \
+    && yum clean all
 RUN chmod -R o+rwx /opt/couchbase/etc
 RUN chmod -R o+rwx /opt/couchbase/var
 

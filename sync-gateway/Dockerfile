@@ -1,7 +1,7 @@
 # This is a RHEL 7 image from Redhat
 FROM registry.access.redhat.com/rhel7
 
-MAINTAINER Couchbase Docker Team <docker@couchbase.com>
+LABEL maintainer="build-team@couchbase.com"
 
 # Install latest security updates
 RUN yum repolist --disablerepo="*" && \
@@ -9,11 +9,7 @@ RUN yum repolist --disablerepo="*" && \
     yum-config-manager --enable rhel-7-server-optional-rpms \
         rhel-7-server-extras-rpms rhel-server-rhscl-7-rpms && \
     yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical \
-        --setopt=tsflags=nodocs
-
-# Install yum dependencies
-RUN yum -y update && \
-    yum install -y wget && \
+        --setopt=tsflags=nodocs && \
     yum clean all
 
 # Add licenses and help file
@@ -21,6 +17,7 @@ COPY licenses /licenses
 COPY help.1 /help.1
 
 ARG PROD_VERSION=2.5.1
+ARG TESTING
 ARG STAGING
 ARG SG_RELEASE_URL=http://packages${STAGING}.couchbase.com/releases/couchbase-sync-gateway/${PROD_VERSION}
 ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_${PROD_VERSION}_x86_64.rpm
@@ -28,11 +25,8 @@ ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_${PROD_VERSION}_x86_64.rpm
 ENV PATH $PATH:/opt/couchbase-sync-gateway/bin
 
 # Install Sync Gateway
-RUN wget $SG_RELEASE_URL/$SG_PACKAGE && \
-    rpm -i $SG_PACKAGE && rm $SG_PACKAGE
-
-# Clean the cache
-RUN yum clean all
+RUN yum install -y $SG_RELEASE_URL/$SG_PACKAGE && \
+    yum clean all
 
 LABEL name="couchbase/sync-gateway" \
       vendor="Couchbase" \

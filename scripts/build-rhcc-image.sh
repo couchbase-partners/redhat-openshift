@@ -53,14 +53,8 @@ fi
 # Enter product directory
 cd ${PRODUCT}
 
-# Select correct Dockerfile
-DOCKER_FILE=Dockerfile
-if [[ "x$TESTING" = "xtrue" && -e "Dockerfile.testing" ]]; then
-   DOCKER_FILE=Dockerfile.testing
-fi
-
 # Ensure base image is up-to-date
-BASE_IMAGE=$(grep '^FROM' ${DOCKER_FILE}|cut -d' ' -f2)
+BASE_IMAGE=$(grep '^FROM' Dockerfile|cut -d' ' -f2)
 docker pull ${BASE_IMAGE}
 
 # Some informational settings
@@ -70,11 +64,12 @@ INTERNAL_IMAGE_NAME=$(cat ${CONF_DIR}/internal_image_name)
 IMAGE=${INTERNAL_IMAGE_NAME}:${VERSION}-${BUILD}
 
 # Build image
-${SCRIPT_DIR}/update-base.sh ${DOCKER_FILE}
+${SCRIPT_DIR}/update-base.sh Dockerfile
 docker build --no-cache \
   --build-arg PROD_VERSION=${VERSION} \
   --build-arg STAGING=${STAGING} \
-  -f ${DOCKER_FILE} -t ${IMAGE} .
+  --build-arg TESTING=${TESTING} \
+  -f Dockerfile -t ${IMAGE} .
 
 echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 echo Pushing ${IMAGE}
