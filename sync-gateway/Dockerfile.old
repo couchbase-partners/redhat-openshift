@@ -1,14 +1,16 @@
-# Dockerfile to build the OpenShift image for sync-gateway
-FROM registry.access.redhat.com/ubi8/ubi-minimal
+# This is a RHEL 7 image from Redhat
+FROM registry.access.redhat.com/rhel7
 
 LABEL maintainer="build-team@couchbase.com"
 
-# ubi-minimal updates frequently and has very few packages installed,
-# so no need for a "security-only" update.
-RUN set -x \
-    && microdnf update \
-    && microdnf install shadow-utils \
-    && microdnf clean all
+# Install latest security updates
+RUN yum repolist --disablerepo="*" && \
+    yum-config-manager --enable rhel-7-server-rpms rhel-7-server-rt-rpms && \
+    yum-config-manager --enable rhel-7-server-optional-rpms \
+        rhel-7-server-extras-rpms rhel-server-rhscl-7-rpms && \
+    yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical \
+        --setopt=tsflags=nodocs && \
+    yum clean all
 
 # Add licenses and help file
 COPY licenses /licenses
@@ -22,14 +24,9 @@ ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_${PROD_VERSION}_x86_64.rpm
 
 ENV PATH $PATH:/opt/couchbase-sync-gateway/bin
 
-# Install Sync Gateway, working around microdnf limitations to
-# install dependencies
-RUN set -x \
-    && curl --fail -o /tmp/sgw.rpm $SG_RELEASE_URL/$SG_PACKAGE \
-    && microdnf install $(rpm -qpR /tmp/sgw.rpm | egrep -v "(config|rpmlib|rtld)" | sed -e 's/(.*//') \
-    && rpm -Uvh /tmp/sgw.rpm \
-    && rm /tmp/sgw.rpm \
-    && microdnf clean all
+# Install Sync Gateway
+RUN yum install -y $SG_RELEASE_URL/$SG_PACKAGE && \
+    yum clean all
 
 LABEL name="couchbase/sync-gateway" \
       vendor="Couchbase" \
