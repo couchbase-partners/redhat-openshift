@@ -1,38 +1,49 @@
 # Dockerfile to build the OpenShift image for couchbase-server
 
-# This is a RHEL 7 image from Redhat
-FROM registry.access.redhat.com/rhel7
+# Stage 0: compile runit. We use the "python" base as it includes
+# most C-language build tools as well.
+FROM registry.access.redhat.com/ubi8/python-36 as runit_build
 
+ARG RUNIT_VER=2.1.2
+USER root
+RUN dnf install -y glibc-static && dnf clean all
+RUN set -x \
+    && mkdir /tmp/runit \
+    && cd /tmp/runit \
+    && curl -O http://smarden.org/runit/runit-${RUNIT_VER}.tar.gz \
+    && tar xf runit-${RUNIT_VER}.tar.gz \
+    && cd admin/runit-${RUNIT_VER} \
+    && package/install
+
+# Stage 1: build Couchbase Server image.
+
+FROM registry.access.redhat.com/ubi8/ubi-minimal
+
+ARG RUNIT_VER=2.1.2
 LABEL maintainer="build-team@couchbase.com"
 
-RUN yum repolist --disablerepo="*" && \
-    yum-config-manager --enable rhel-7-server-rpms rhel-7-server-rt-rpms && \
-    yum-config-manager --enable rhel-7-server-optional-rpms \
-        rhel-7-server-extras-rpms rhel-server-rhscl-7-rpms && \
-    yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical \
-        --setopt=tsflags=nodocs && \
-    yum clean all
+# ubi-minimal updates frequently and has very few packages installed,
+# so no need for a "security-only" update.
+RUN microdnf update && microdnf clean all
 
 # Install yum dependencies
-RUN yum -y install tar \
-      lsof lshw net-tools \
-      psmisc zip unzip \
-      gzip \
-    && yum clean all
+RUN microdnf -y install \
+        findutils \
+        gzip \
+        hostname \
+        lsof \
+        lshw \
+        net-tools \
+        procps-ng \
+        psmisc \
+        tar \
+        unzip \
+        zip \
+    && microdnf clean all
 
-# Install sshd only if TESTING
-ARG TESTING
-RUN if [ "x$TESTING" = "xtrue" ]; then \
-        yum install -y openssh openssh-server; \
-        yum clean all; \
-    fi
-
-# Install runit
-RUN curl -s https://packagecloud.io/install/repositories/imeyer/runit/script.rpm.sh | bash \
-    && yum -y install runit \
-    && yum clean all
-
-COPY functions /etc/init.d/
+# Copy runit from stage 0
+COPY --from=runit_build /tmp/runit/admin/runit-${RUNIT_VER}/command/* /sbin/
+COPY --from=runit_build /tmp/runit/admin/runit-${RUNIT_VER}/etc/2 /sbin/runsvdir-start
 
 # Add licenses and help file
 COPY licenses /licenses
@@ -41,19 +52,25 @@ COPY help.1 /help.1
 ARG PROD_VERSION
 ARG STAGING
 ARG CB_RELEASE_URL=http://packages${STAGING}.couchbase.com/releases/${PROD_VERSION}
-ARG CB_PACKAGE=couchbase-server-enterprise-${PROD_VERSION}-centos7.x86_64.rpm
+ARG CB_PACKAGE=couchbase-server-enterprise-${PROD_VERSION}-centos8.x86_64.rpm
 
 ENV PATH=$PATH:/opt/couchbase/bin:/opt/couchbase/bin/tools:/opt/couchbase/bin/install
 
 # Create Couchbase user with UID 1000 (necessary to match default
 # boot2docker UID)
-RUN groupadd -g1000 couchbase && \
-    useradd couchbase -g couchbase -u1000 -m -s /bin/bash && \
-    echo 'couchbase:couchbase' | chpasswd
+RUN set -x \
+    && groupadd -g1000 couchbase \
+    && useradd couchbase -g couchbase -u1000 -m -s /bin/bash  \
+    && echo 'couchbase:couchbase' | chpasswd
 
-# Install couchbase
-RUN yum install -y $CB_RELEASE_URL/$CB_PACKAGE \
-    && yum clean all
+# Install Couchbase Server, working around microdnf limitations to
+# install dependencies
+RUN set -x \
+    && curl --fail -o /tmp/couchbase.rpm $CB_RELEASE_URL/$CB_PACKAGE \
+    && microdnf install $(rpm -qpR /tmp/couchbase.rpm | egrep -v "(config|rpmlib)" | sed -e 's/(.*//') \
+    && rpm -Uvh /tmp/couchbase.rpm \
+    && rm /tmp/couchbase.rpm \
+    && microdnf clean all
 RUN chmod -R o+rwx /opt/couchbase/etc
 RUN chmod -R o+rwx /opt/couchbase/var
 
@@ -61,22 +78,20 @@ RUN chmod -R o+rwx /opt/couchbase/var
 RUN sed -i -e '1 s/$/\/docker/' /opt/couchbase/VARIANT.txt
 
 # Add runit script for couchbase-server
-COPY scripts/run /etc/service/couchbase-server/run
-RUN chmod go+rwx /etc/service/couchbase-server
+COPY scripts/run /service/couchbase-server/run
+RUN chmod go+rwx /service/couchbase-server
 
 # Temporary fix for entrypoint
-RUN chmod o+rx /sbin/*
+#RUN chmod o+rx /sbin/*
 
 # Add dummy script for commands invoked by cbcollect_info that
 # make no sense in a Docker container
 COPY scripts/dummy.sh /usr/local/bin/
-RUN ln -s dummy.sh /usr/local/bin/iptables-save && \
-    ln -s dummy.sh /usr/local/bin/lvdisplay && \
-    ln -s dummy.sh /usr/local/bin/vgdisplay && \
-    ln -s dummy.sh /usr/local/bin/pvdisplay
-
-# Clean the cache
-RUN yum clean all
+RUN set -x \
+    && ln -s dummy.sh /usr/local/bin/iptables-save \
+    && ln -s dummy.sh /usr/local/bin/lvdisplay \
+    && ln -s dummy.sh /usr/local/bin/vgdisplay \
+    && ln -s dummy.sh /usr/local/bin/pvdisplay
 
 LABEL name="couchbase/server" \
       vendor="Couchbase" \
