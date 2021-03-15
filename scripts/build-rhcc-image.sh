@@ -69,10 +69,9 @@ fi
 # Enter product directory
 cd ${PRODUCT}
 
-# Some informational settings
-CONF_DIR=/home/couchbase/openshift/${PRODUCT}
-INTERNAL_IMAGE_NAME=$(cat ${CONF_DIR}/internal_image_name)
-
+# Determine image name per project - these are always uploaded to gitlab,
+# so the build server should have push access there
+INTERNAL_IMAGE_NAME=$(cat internal-image-name)
 IMAGE=${INTERNAL_IMAGE_NAME}:${VERSION}-${BUILD}
 
 # Build image
