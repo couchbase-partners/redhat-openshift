@@ -75,7 +75,7 @@ INTERNAL_IMAGE_NAME=$(cat internal-image-name)
 IMAGE=${INTERNAL_IMAGE_NAME}:${VERSION}-${BUILD}
 
 # Build image
-${SCRIPT_DIR}/update-base.sh Dockerfile
+${SCRIPT_DIR}/update-base.sh ${DOCKERFILE}
 docker build ${CACHE_ARG} \
   --build-arg PROD_VERSION=${VERSION} \
   --build-arg STAGING=${STAGING} \
