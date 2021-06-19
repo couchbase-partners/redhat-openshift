@@ -67,7 +67,7 @@ RUN set -x \
 # install dependencies
 RUN set -x \
     && curl --fail -o /tmp/couchbase.rpm $CB_RELEASE_URL/$CB_PACKAGE \
-    && microdnf install $(rpm -qpR /tmp/couchbase.rpm | egrep -v "(config|rpmlib)" | sed -e 's/(.*//') \
+    && microdnf install $(rpm -qpR /tmp/couchbase.rpm | egrep -v "^(config|rpmlib|libc.so|/bin/sh)") \
     && rpm -Uvh /tmp/couchbase.rpm \
     && rm /tmp/couchbase.rpm \
     && microdnf clean all
