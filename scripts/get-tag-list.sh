@@ -17,14 +17,13 @@ CONF_DIR=/home/couchbase/openshift/${PRODUCT}
 IMAGE_NAME=$(cat ${CONF_DIR}/image_name)
 
 # Do OAuth dance with RHCC
-tokenUri="https://registry.connect.redhat.com/auth/realms/rhc4tp/protocol/redhat-docker-v2/auth"
+tokenUri="https://sso.redhat.com/auth/realms/rhcc/protocol/redhat-docker-v2/auth?service=docker-registry&client_id=curl&scope=repository:rhel:pull"
 # This is a "Registry Service Account" on access.redhat.com associated with the rhel8-couchbase user
 username='7638313|rhel8-couchbase'
 set +x
 password=$(cat /home/couchbase/openshift/rhcc/registry-service-token.txt)
 # Obtain short-duration access token from auth server
-data=("service=docker-registry" "client_id=curl" "scope=repository:rhel:pull")
-token=$(curl --silent -L --user "$username:$password" --get --data-urlencode ${data[0]} --data-urlencode ${data[1]} --data-urlencode ${data[2]} $tokenUri |
+token=$(curl --silent -L --user "$username:$password" --get $tokenUri |
         python -c 'import sys, json; print (json.load(sys.stdin)["token"])')
 
 listUri="https://registry.connect.redhat.com/v2/$IMAGE_NAME/tags/list"
