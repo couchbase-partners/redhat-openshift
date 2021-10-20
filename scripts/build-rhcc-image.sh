@@ -56,10 +56,10 @@ if [[ -z "$BUILD" ]]; then
 fi
 
 # Use new UBI-based Dockerfile for Server 7.x or later, or SGW 3.x or later
-if [[ ${PRODUCT} == "couchbase-server" && ${VERSION} =~ 6.* ]]; then
+if [[ ${PRODUCT} == "couchbase-server" && ${VERSION} =~ ^6.* ]]; then
     echo "Using old-school Dockerfile.old"
     DOCKERFILE=Dockerfile.old
-elif [[ ${PRODUCT} == "sync-gateway" && ${VERSION} =~ 2.* ]]; then
+elif [[ ${PRODUCT} == "sync-gateway" && ${VERSION} =~ ^2.* ]]; then
     echo "Using old-school Dockerfile.old"
     DOCKERFILE=Dockerfile.old
 else
