@@ -43,7 +43,6 @@ RUN microdnf -y install \
 
 # Copy runit from stage 0
 COPY --from=runit_build /tmp/runit/admin/runit-${RUNIT_VER}/command/* /sbin/
-COPY --from=runit_build /tmp/runit/admin/runit-${RUNIT_VER}/etc/2 /sbin/runsvdir-start
 
 # Add licenses and help file
 COPY licenses /licenses
