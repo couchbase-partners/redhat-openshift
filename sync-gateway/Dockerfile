@@ -52,6 +52,8 @@ ENTRYPOINT ["sync_gateway"]
 # If user doesn't specify any args, use the default config
 CMD ["/etc/sync_gateway/config.json"]
 
+USER sync_gateway
+
 # Expose ports
 #  port 4984: public port, port 4985: admin port
 EXPOSE 4984 4985
