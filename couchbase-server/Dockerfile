@@ -100,7 +100,9 @@ LABEL name="couchbase/server" \
       description="Couchbase Server ${PROD_VERSION} Enterprise" \
       architecture="x86_64" \
       run="docker run -d --privileged -p 8091:8091 --restart always \
-           --name NAME IMAGE"
+           --name NAME IMAGE" \
+      io.k8s.description="Couchbase Server is the world's most complete, scalable, and highest performing NoSQL database. We engineered the product to meet the most demanding enterprise and big data requirements for distributed database performance and scalability." \
+      io.openshift.expose-services="8091/tcp:rest,18091/tcp:ssl_rest,8092/tcp:capi,18092/tcp:ssl_capi,8093/tcp:query,18093/tcp:ssl_query,8094/tcp:fts_http,18094/tcp:fts_ssl,8095/tcp:cbas_http,18095/tcp:cbas_ssl,8096/tcp:eventing_http,18096/tcp:eventing_ssl,8097/tcp:backup_http,18097/tcp:backup_ssl,9123/tcp:prometheus_http,11210/tcp:memcached,11207/tcp:memcached_ssl,11280/tcp:memcached_prometheus"
 
 COPY scripts/entrypoint.sh /
 
@@ -108,5 +110,23 @@ USER 1000
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["couchbase-server"]
 
-EXPOSE 8091 8092 8093 8094 11207 11210 11211 18091 18092 18093
+EXPOSE 8091 \
+       8092 \
+       8093 \
+       8094 \
+       8095 \
+       8096 \
+       8097 \
+       9123 \
+       11207 \
+       11210 \
+       11280 \
+       18091 \
+       18092 \
+       18093 \
+       18094 \
+       18095 \
+       18096 \
+       18097
+
 VOLUME /opt/couchbase/var
