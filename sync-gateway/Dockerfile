@@ -38,7 +38,8 @@ LABEL name="couchbase/sync-gateway" \
       summary="Couchbase Sync Gateway ${PROD_VERSION} Enterprise" \
       description="Couchbase Sync Gateway ${PROD_VERSION} Enterprise" \
       architecture="x86_64" \
-      run="docker run -p 4984:4984 -d IMAGE"
+      run="docker run -p 4984:4984 -d IMAGE" \
+      io.k8s.description="Sync Gateway maintains up-to-date copies of documents where users need them. On mobile devices for instant access and on servers in data centers for reasons such as synchronizing documents, sharing documents, and loss-protection. Mobile apps create, update, and delete files locally, Sync Gateway takes care of the rest."
 
 # Create directory where the default config stores memory snapshots to disk
 RUN mkdir /opt/couchbase-sync-gateway/data
