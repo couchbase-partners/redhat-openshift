@@ -50,7 +50,7 @@ COPY help.1 /help.1
 
 ARG PROD_VERSION
 ARG STAGING
-ARG CB_RELEASE_URL=http://packages${STAGING}.couchbase.com/releases/${PROD_VERSION}
+ARG CB_RELEASE_URL=https://packages${STAGING}.couchbase.com/releases/${PROD_VERSION}
 ARG CB_PACKAGE=couchbase-server-enterprise-${PROD_VERSION}-rhel8.x86_64.rpm
 
 ENV PATH=$PATH:/opt/couchbase/bin:/opt/couchbase/bin/tools:/opt/couchbase/bin/install
