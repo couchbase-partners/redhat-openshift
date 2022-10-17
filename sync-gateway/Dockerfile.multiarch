@@ -17,10 +17,8 @@ COPY help.1 /help.1
 ARG PROD_VERSION=3.0.4
 ARG STAGING
 ARG TARGETARCH
-# ARG SG_RELEASE_URL=http://packages${STAGING}.couchbase.com/releases/couchbase-sync-gateway/${PROD_VERSION}
-# ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_${PROD_VERSION}_${TARGETARCH}.rpm
-ARG SG_RELEASE_URL=http://latestbuilds.service.couchbase.com/builds/latestbuilds/sync_gateway/3.1.0/364
-ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_${PROD_VERSION}-364_${TARGETARCH}.rpm
+ARG SG_RELEASE_URL=http://packages${STAGING}.couchbase.com/releases/couchbase-sync-gateway/${PROD_VERSION}
+ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_${PROD_VERSION}_${TARGETARCH}.rpm
 
 ENV PATH $PATH:/opt/couchbase-sync-gateway/bin
 
