@@ -138,7 +138,7 @@ for registry in ghcr.io build-docker.couchbase.com; do
         echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         echo Building and Pushing ${IMAGE}
         echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        echo docker buildx build --platform ${platforms} --push ${CACHE_ARG} \
+        docker buildx build --platform ${platforms} --push ${CACHE_ARG} \
         --build-arg PROD_VERSION=${VERSION} \
         --build-arg STAGING=${STAGING} \
         -f ${DOCKERFILE} -t ${IMAGE} .
