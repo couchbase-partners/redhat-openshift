@@ -66,14 +66,18 @@ if [[ ${PRODUCT} == "couchbase-server" && $BLD_NUM -lt 10 ]]; then
 fi
 
 # Use new UBI-based Dockerfile for Server 7.x or later, or SGW 3.x or later
-if [[ ${PRODUCT} == "couchbase-server" && ${VERSION} =~ ^6.* ]]; then
-    echo "Using old-school Dockerfile.old"
-    DOCKERFILE=Dockerfile.old
+if [[ ${PRODUCT} == "couchbase-server" ]]; then
+    if [[ ${VERSION} =~ ^6.* ]]; then
+        echo "Using legacy Dockerfile.6.x"
+        DOCKERFILE=Dockerfile.old
+    else
+        DOCKERFILE=Dockerfile.multiarch
+    fi
 elif [[ ${PRODUCT} == "sync-gateway" ]]; then
     if [[ ${VERSION} =~ ^2.* ]]; then
         echo "Using legacy Dockerfile.2.x"
         DOCKERFILE=Dockerfile.2.x
-    elif version_lte ${VERSION} 3.0.3; then
+    elif version_lte ${VERSION} 3.0.4; then
         echo "Using legacy Dockerfile.x64"
         DOCKERFILE=Dockerfile.x64
     else
@@ -96,7 +100,7 @@ fi
 # Figure out whether which platforms we're targeting
 case ${PRODUCT} in
     couchbase-server)
-        if version_lte 7.2.0; then
+        if version_lte ${VERSION} 7.2.0; then
             arches="amd64"
             platforms="linux/amd64"
         else
@@ -105,7 +109,7 @@ case ${PRODUCT} in
         fi
         ;;
     sync-gateway)
-        if version_lte ${VERSION} 3.0.3; then
+        if version_lte ${VERSION} 3.0.4; then
             arches="amd64"
             platforms="linux/amd64"
         else
@@ -138,7 +142,7 @@ for registry in ghcr.io build-docker.couchbase.com; do
         echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         echo Building and Pushing ${IMAGE}
         echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        docker buildx build --platform ${platforms} --push ${CACHE_ARG} \
+        echo docker buildx build --platform ${platforms} --push ${CACHE_ARG} \
         --build-arg PROD_VERSION=${VERSION} \
         --build-arg STAGING=${STAGING} \
         -f ${DOCKERFILE} -t ${IMAGE} .

@@ -59,15 +59,9 @@ BASE_VERSION=${VERSION%-*}
 OUTPUT_IMAGE=scan.connect.redhat.com/${PROJECT_ID}/unused:${BASE_VERSION}-${BUILD}
 fi
 
-# Ensure image is available locally to be pushed
-docker pull ${INTERNAL_IMAGE_NAME}
-
-docker tag ${INTERNAL_IMAGE_NAME} ${OUTPUT_IMAGE}
+# Copy image from internal to external repo
 echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-echo Pushing ${INTERNAL_IMAGE_NAME}
-echo as ${OUTPUT_IMAGE}
+echo Copying ${INTERNAL_IMAGE_NAME}
+echo to ${OUTPUT_IMAGE}
 echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-docker push ${OUTPUT_IMAGE}
-docker rmi ${INTERNAL_IMAGE_NAME}
-docker rmi ${OUTPUT_IMAGE}
+skopeo copy ${INTERNAL_IMAGE_NAME} ${OUTPUT_IMAGE}
