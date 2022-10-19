@@ -59,9 +59,17 @@ BASE_VERSION=${VERSION%-*}
 OUTPUT_IMAGE=scan.connect.redhat.com/${PROJECT_ID}/unused:${BASE_VERSION}-${BUILD}
 fi
 
+# If we're on a builder with buildx, it's assumed that we're dealing with
+# a multiarch image, so should copy all architectures
+if docker --help | grep buildx &>/dev/null; then
+    ARCHITECTURES="--multi-arch all"
+else
+    ARCHITECTURES="--multi-arch system"
+fi
+
 # Copy image from internal to external repo
 echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 echo Copying ${INTERNAL_IMAGE_NAME}
 echo to ${OUTPUT_IMAGE}
 echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-skopeo copy ${INTERNAL_IMAGE_NAME} ${OUTPUT_IMAGE}
+skopeo copy ${ARCHITECTURES} ${INTERNAL_IMAGE_NAME} ${OUTPUT_IMAGE}

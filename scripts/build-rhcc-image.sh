@@ -13,8 +13,21 @@ function show_help {
     exit 0
 }
 
-version_lte() {
-    [  "${1}" = "$(printf "${1}\n${2}" | sort -V | head -n1)" ]
+
+function version_lt() {
+    [ "${1}" = "${2}" ] && return 1 || [  "${1}" = "$(printf "${1}\n${2}" | sort -V | head -n1)" ]
+}
+
+function multiarch() {
+    case "${PRODUCT}" in
+        couchbase-server)
+            version_lt ${VERSION} 7.1.2 && return 1
+            ;;
+        sync-gateway)
+            version_lt ${VERSION} 3.0.4 && return 1
+            ;;
+    esac
+    return 0
 }
 
 SCRIPT_DIR=$(dirname $(readlink -e -- "${BASH_SOURCE}"))
@@ -71,18 +84,18 @@ if [[ ${PRODUCT} == "couchbase-server" ]]; then
         echo "Using legacy Dockerfile.6.x"
         DOCKERFILE=Dockerfile.old
     else
-        DOCKERFILE=Dockerfile.multiarch
+        DOCKERFILE=Dockerfile
     fi
 elif [[ ${PRODUCT} == "sync-gateway" ]]; then
-    if [[ ${VERSION} =~ ^2.* ]]; then
-        echo "Using legacy Dockerfile.2.x"
-        DOCKERFILE=Dockerfile.2.x
-    elif version_lte ${VERSION} 3.0.4; then
-        echo "Using legacy Dockerfile.x64"
-        DOCKERFILE=Dockerfile.x64
-    else
+    if multiarch; then
         echo "Using multiarch Dockerfile.multiarch"
         DOCKERFILE=Dockerfile.multiarch
+    elif [[ ${VERSION} =~ ^2.* ]]; then
+        echo "Using legacy Dockerfile.2.x"
+        DOCKERFILE=Dockerfile.2.x
+    else
+        echo "Using legacy Dockerfile.x64"
+        DOCKERFILE=Dockerfile.x64
     fi
 fi
 
@@ -97,28 +110,7 @@ else
     INTERNAL_IMAGE_NAME=cb-rhcc/sync-gateway
 fi
 
-# Figure out whether which platforms we're targeting
-case ${PRODUCT} in
-    couchbase-server)
-        if version_lte ${VERSION} 7.2.0; then
-            arches="amd64"
-            platforms="linux/amd64"
-        else
-            arches="amd64 arm64"
-            platforms="linux/amd64,linux/arm64"
-        fi
-        ;;
-    sync-gateway)
-        if version_lte ${VERSION} 3.0.4; then
-            arches="amd64"
-            platforms="linux/amd64"
-        else
-            arches="amd64 arm64"
-            platforms="linux/amd64,linux/arm64"
-        fi
-        ;;
-esac
-
+BUILD_ARGS="--build-arg PROD_VERSION=${VERSION} --build-arg STAGING=${STAGING}"
 
 # Build and push images
 for registry in ghcr.io build-docker.couchbase.com; do
@@ -126,25 +118,39 @@ for registry in ghcr.io build-docker.couchbase.com; do
 
     ${SCRIPT_DIR}/update-base.sh ${DOCKERFILE}
     if [ "${DRYRUN}" = "yes" ]; then
-        # For dry run, we build each architecture's image individually
-        # so we can load them into the local image store for testing
-        for arch in $arches; do
-            IMAGE=${registry}/${INTERNAL_IMAGE_NAME}:${VERSION}-${BLD_NUM}-${arch}
+        IMAGE=${registry}/${INTERNAL_IMAGE_NAME}:${VERSION}-${BLD_NUM}
+        # For dry run where buildx is present and we're doing a multiarch
+        # build, we build each architecture's image individually so we
+        # can load them into the local image store for testing
+        if multiarch; then
+            for arch in amd64 arm64; do
+            echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+            echo Building ${IMAGE}-${arch}
+            echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                docker buildx build --platform linux/${arch} --load \
+                ${CACHE_ARG} ${BUILD_ARGS} \
+                -f ${DOCKERFILE} -t ${IMAGE}-${arch} .
+            done
+        else
             echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
             echo Building ${IMAGE}
             echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-            docker buildx build --platform linux/${arch} --load ${CACHE_ARG} \
-            --build-arg PROD_VERSION=${VERSION} \
-            --build-arg STAGING=${STAGING} \
+            docker build ${CACHE_ARG} ${BUILD_ARGS} \
             -f ${DOCKERFILE} -t ${IMAGE} .
-        done
+        fi
     else
         echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         echo Building and Pushing ${IMAGE}
         echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        docker buildx build --platform ${platforms} --push ${CACHE_ARG} \
-        --build-arg PROD_VERSION=${VERSION} \
-        --build-arg STAGING=${STAGING} \
-        -f ${DOCKERFILE} -t ${IMAGE} .
+        if multiarch; then
+            docker buildx build --platform linux/amd64,linux/arm64 --push \
+            ${CACHE_ARG} ${BUILD_ARGS} \
+            -f ${DOCKERFILE} -t ${IMAGE} .
+        else
+            docker build ${CACHE_ARG} ${BUILD_ARGS} \
+            -f ${DOCKERFILE} -t ${IMAGE} .
+            docker push ${IMAGE}
+            docker rmi ${IMAGE}
+        fi
     fi
 done
