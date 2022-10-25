@@ -21,10 +21,10 @@ function version_lt() {
 function multiarch() {
     case "${PRODUCT}" in
         couchbase-server)
-            version_lt ${VERSION} 7.1.2 && return 1
+            version_lt ${VERSION} 7.1.3 && return 1
             ;;
         sync-gateway)
-            version_lt ${VERSION} 3.0.4 && return 1
+            version_lt ${VERSION} 3.0.5 && return 1
             ;;
     esac
     return 0
