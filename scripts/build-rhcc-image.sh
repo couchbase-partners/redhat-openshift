@@ -56,7 +56,7 @@ if [[ -z "$BLD_NUM" ]]; then
     echo "Build number of product (-b) is required"
     exit 1
 fi
-if [[ $BLD_NUM -lt 10 ]]; then
+if [[ ${PRODUCT} == "couchbase-server" && $BLD_NUM -lt 10 ]]; then
     echo "Please use complete internal build number, not ${BLD_NUM}"
     exit 1
 fi
