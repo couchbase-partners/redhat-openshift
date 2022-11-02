@@ -9,7 +9,7 @@ function show_help {
     echo "  -b : Build number to use (eg. 1234) (Required)"
     echo "  -s : Build from staging repository (Optional, defaults to false)"
     echo "  -q : Quick build (disables docker build --no-cache)"
-    echo "  -n : Dry run (don't push to gitlab)"
+    echo "  -n : Dry run (don't push to docker registries)"
     exit 0
 }
 
