@@ -51,8 +51,8 @@ COPY help.1 /help.1
 ARG PROD_VERSION
 ARG STAGING
 ARG TARGETARCH
-ARG CB_RELEASE_URL=http://packages${STAGING}.couchbase.com/releases/${PROD_VERSION}
-ARG CB_PACKAGE=couchbase-server-enterprise-${PROD_VERSION}-linux.${TARGETARCH}.rpm
+ARG RELEASE_BASE_URL=http://packages${STAGING}.couchbase.com/releases/${PROD_VERSION}
+ARG PACKAGE_NAME=couchbase-server-enterprise-${PROD_VERSION}-linux.${TARGETARCH}.rpm
 
 ENV PATH=$PATH:/opt/couchbase/bin:/opt/couchbase/bin/tools:/opt/couchbase/bin/install
 
@@ -66,7 +66,7 @@ RUN set -x \
 # Install Couchbase Server, working around microdnf limitations to
 # install dependencies
 RUN set -x \
-    && curl --fail -o /tmp/couchbase.rpm $CB_RELEASE_URL/$(echo $CB_PACKAGE | sed -e 's/arm64/aarch64/' -e 's/amd64/x86_64/') \
+    && curl --fail -o /tmp/couchbase.rpm $RELEASE_BASE_URL/$(echo $PACKAGE_NAME | sed -e 's/arm64/aarch64/' -e 's/amd64/x86_64/') \
     && microdnf install $(rpm -qpR /tmp/couchbase.rpm | egrep -v "^(config|rpmlib|libc.so|/bin/sh)") \
     && rpm -Uvh /tmp/couchbase.rpm \
     && rm /tmp/couchbase.rpm \

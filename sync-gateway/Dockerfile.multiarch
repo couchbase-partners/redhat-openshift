@@ -17,14 +17,14 @@ COPY help.1 /help.1
 ARG PROD_VERSION=3.0.4
 ARG STAGING
 ARG TARGETARCH
-ARG SG_RELEASE_URL=http://packages${STAGING}.couchbase.com/releases/couchbase-sync-gateway/${PROD_VERSION}
-ARG SG_PACKAGE=couchbase-sync-gateway-enterprise_${PROD_VERSION}_${TARGETARCH}.rpm
+ARG RELEASE_BASE_URL=http://packages${STAGING}.couchbase.com/releases/couchbase-sync-gateway/${PROD_VERSION}
+ARG PACKAGE_NAME=couchbase-sync-gateway-enterprise_${PROD_VERSION}_${TARGETARCH}.rpm
 
 ENV PATH $PATH:/opt/couchbase-sync-gateway/bin
 
 # Install Sync Gateway
 RUN set -x \
-    && curl --fail -o /tmp/sgw.rpm $SG_RELEASE_URL/$(echo $SG_PACKAGE | sed -e 's/arm64/aarch64/' -e 's/amd64/x86_64/') \
+    && curl --fail -o /tmp/sgw.rpm $RELEASE_BASE_URL/$(echo $PACKAGE_NAME | sed -e 's/arm64/aarch64/' -e 's/amd64/x86_64/') \
     && rpm -Uvh /tmp/sgw.rpm \
     && rm /tmp/sgw.rpm \
     && microdnf clean all

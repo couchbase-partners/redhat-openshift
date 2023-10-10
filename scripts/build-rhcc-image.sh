@@ -9,6 +9,8 @@ function show_help {
     echo "  -b : Build number to use (eg. 1234) (Required)"
     echo "  -s : Build from staging repository (Optional, defaults to false)"
     echo "  -q : Quick build (disables docker build --no-cache)"
+    echo "  -l : Pull build from latestbuilds, rather than download from S3"
+    echo "       (Only works with most recent Server/SGW versions)"
     echo "  -n : Dry run (don't push to docker registries)"
     exit 0
 }
@@ -35,9 +37,10 @@ SCRIPT_DIR=$(dirname $(readlink -e -- "${BASH_SOURCE}"))
 STAGING=""
 CACHE_ARG="--no-cache"
 DRYRUN=""
+FROM_LATESTBUILDS="false"
 
 # Parse options and ensure required ones are there
-while getopts :p:v:b:qsnh opt; do
+while getopts :p:v:b:qlsnh opt; do
     case ${opt} in
         p) PRODUCT="$OPTARG"
            ;;
@@ -48,6 +51,8 @@ while getopts :p:v:b:qsnh opt; do
         s) STAGING="-staging"
            ;;
         q) CACHE_ARG=""
+           ;;
+        l) FROM_LATESTBUILDS="true"
            ;;
         n) DRYRUN="yes"
            ;;
@@ -111,6 +116,14 @@ else
 fi
 
 BUILD_ARGS="--build-arg PROD_VERSION=${VERSION} --build-arg STAGING=${STAGING}"
+
+# Override download locations if building from latestbuilds
+if ${FROM_LATESTBUILDS}; then
+    BUILD_ARGS+=" --build-arg RELEASE_BASE_URL="
+    BUILD_ARGS+="https://latestbuilds.service.couchbase.com/builds/latestbuilds"
+    BUILD_ARGS+="/${PRODUCT}/${RELEASE}/${BLD_NUM}"
+    BUILD_ARGS+=" --build-arg PROD_VERSION=${VERSION}-${BLD_NUM}"
+fi
 
 # Build and push images
 for registry in ghcr.io build-docker.couchbase.com; do
