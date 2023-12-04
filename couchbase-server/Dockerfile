@@ -26,7 +26,8 @@ LABEL maintainer="build-team@couchbase.com"
 # so no need for a "security-only" update.
 RUN microdnf update && microdnf clean all
 
-# Install yum dependencies
+# Install yum dependencies. Reinstall tzdata to ensure /usr/share/zoneinfo
+# exists (https://bugzilla.redhat.com/show_bug.cgi?id=1668185).
 RUN microdnf -y install \
         findutils \
         gzip \
@@ -39,6 +40,7 @@ RUN microdnf -y install \
         tar \
         unzip \
         zip \
+    && microdnf -y reinstall tzdata \
     && microdnf clean all
 
 # Copy runit from stage 0
