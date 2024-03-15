@@ -4,22 +4,19 @@
 # most C-language build tools as well.
 FROM registry.access.redhat.com/ubi8/python-36 as runit_build
 
-ARG RUNIT_VER=2.1.2
 USER root
 RUN dnf install -y glibc-static && dnf clean all
 RUN set -x \
-    && mkdir /tmp/runit \
-    && cd /tmp/runit \
-    && curl -O http://smarden.org/runit/runit-${RUNIT_VER}.tar.gz \
-    && tar xf runit-${RUNIT_VER}.tar.gz \
-    && cd admin/runit-${RUNIT_VER} \
-    && package/install
+    && mkdir /tmp/work \
+    && cd /tmp/work \
+    && git clone https://github.com/couchbasedeps/runit
+WORKDIR /tmp/work/runit
+RUN ./package/compile
 
 # Stage 1: build Couchbase Server image.
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal
 
-ARG RUNIT_VER=2.1.2
 LABEL maintainer="build-team@couchbase.com"
 
 # ubi-minimal updates frequently and has very few packages installed,
@@ -44,7 +41,7 @@ RUN microdnf -y install \
     && microdnf clean all
 
 # Copy runit from stage 0
-COPY --from=runit_build /tmp/runit/admin/runit-${RUNIT_VER}/command/* /sbin/
+COPY --from=runit_build /tmp/work/runit/command/* /sbin/
 
 # Add licenses and help file
 COPY licenses /licenses
