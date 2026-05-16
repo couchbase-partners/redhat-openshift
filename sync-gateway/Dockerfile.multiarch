@@ -6,8 +6,8 @@ LABEL maintainer="build-team@couchbase.com"
 # ubi-minimal updates frequently and has very few packages installed,
 # so no need for a "security-only" update.
 RUN set -x \
-    && microdnf update \
-    && microdnf install shadow-utils \
+    && microdnf update -y \
+    && microdnf install -y shadow-utils \
     && microdnf clean all
 
 # Add licenses and help file
